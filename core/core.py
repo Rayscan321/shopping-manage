@@ -18,7 +18,7 @@ def register():
         username = input("请输入用户名：").strip()
         password = input("请输入密码：").strip()
         re_password = input("请确认密码：").strip()
-        is_register = input("按任意键确认/n退出：").strip().lower()
+        is_register = input("按任意键确认|n退出：").strip().lower()
 
         # 简单的逻辑判断
         # 用户是否想要退出
@@ -32,14 +32,39 @@ def register():
 
         import re
         # 校验用户名是否合法
-        if not re.findall(r"^[a-zA-Z]\w{2, 9}$", username):
+        if not re.findall(r"^[a-zA-Z]\w{2,9}$", username):
             print("\n用户名不符合要求！\n用户名必须为3-10个字符，只能由字母、数字、下划线组成，并只能以字母开头")
             continue
 
         # 校验密码强度
-        if not re.findall("^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).{8, 16}$", password):
+        if not re.findall("^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).{8,16}$", password):
             print("密码强度太弱，必须包含大写字母、小写字母、以及数字，且长度为8到12位")
             continue
+
+        # 查看用户名是否存在
+        import json
+        import os
+        from conf import settings
+        user_path = os.path.join(
+            settings.USER_DATA_DIR, f"{username}.json"
+        )
+        # 若存在则让用户重新输入
+        if os.path.exists(user_path):
+            print("\n用户名已存在！")
+            continue
+        # 若不存在则保存用户数据
+        user_data = {
+            "username": username,
+            "password": password,
+            "balance": 0,
+            "shopping_cart": [],
+            "flow": [],
+            "is_admin": False,
+            "locked": False,
+        }
+        with open(user_path, "wt", encoding="utf-8") as f:
+            json.dump(user_data, f, ensure_ascii=False)
+        break
 
 
 # 2、登录功能
