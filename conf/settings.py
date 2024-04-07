@@ -1,4 +1,5 @@
 import os
+import configparser
 
 
 # 获取项目根路径
@@ -12,14 +13,16 @@ CONFIG_PATH = os.path.join(
 )
 
 # 获取USER_DATA路径
-import configparser
 config = configparser.ConfigParser()
 config.read(CONFIG_PATH, encoding="utf-8-sig")
 USER_DATA_DIR = config.get("path", "USER_DATA_DIR")
 if not os.path.exists(USER_DATA_DIR):
     USER_DATA_DIR = os.path.join(
-    BASE_DIR, "db", "user_data"
-)
+        BASE_DIR, "db", "user_data"
+    )
+
+# 获取银行利率
+RATE = config.getfloat("bank", "RATE")
 
 if __name__ == "__main__":
     print(USER_DATA_DIR)
