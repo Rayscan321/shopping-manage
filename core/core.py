@@ -2,7 +2,7 @@
 用户视图层
 """
 import re
-from interface import user_interface, bank_interface
+from interface import user_interface, bank_interface, shop_interface
 from lib import common
 
 logged_user = None
@@ -111,7 +111,75 @@ def recharge(username=False):
 # 4、购物功能
 @common.login_auth
 def shopping():
-    print("购物功能")
+    # 初始化购物车
+    shopping_cart = {}
+
+    # 调用接口层获取商品数据
+    goods = shop_interface.check_product("goods")
+
+    while True:
+        # 用户输入购买的商品编号
+        print("\n欢迎来到购物".center(20, "-"))
+        print(f"{'序号':<10}{'商品编号':<10}{'商品名称':<10}{'商品价格':<10}")
+        for index, good in enumerate(goods):
+            print(f"{index+1:<10}{good['number']:<10}{good['name']:<10}{good['price']:<10}")
+        print("\n24小时服务".center(20, "-"))
+        goods_id = input("请输入要购买的商品编号（y结算/n退出）：").strip()
+        # 如果good_id为n则调用添加购物车接口，把购物车写入文件
+        if goods_id == "n":
+            if not shopping_cart:
+                break
+            status, msg = shop_interface.add_shopping_cart(logged_user, shopping_cart)
+            print(msg)
+            if status:
+                break
+        # 如果用户输入y，调用结算接口
+        if goods_id == "y":
+            if not shopping_cart:
+                print("\n购物车为空")
+                continue
+            status, msg, total_price = shop_interface.close_account(logged_user, shopping_cart)
+            print(msg)
+            if status:
+                print(f"欢迎光临商城".center(20, "-"))
+                print("=" * 20)
+                print(f"{'序号':<10}{'商品编号':<10}{'商品名称':<10}{'商品价格':<10}{'商品数量':<10}{'商品总价':<10}")
+                for index, good in enumerate(shopping_cart.values()):
+                    print(
+                        f"{index + 1:<10}{good['number']:<10}{good['name']:<10}{good['price']:<10}{good['数量']:<10}{good['数量'] * good['price']:<10}")
+                print(f"总价：{total_price}")
+                print("=" * 20)
+                print(f"欢迎下次光临".center(20, "-"))
+                break
+
+        # 判断用户输入的编号是否存在
+        if not goods_id.isdigit():
+            print("\n请输入正确商品编号")
+            continue
+        goods_id = int(goods_id)-1
+        if goods_id not in list(range(len(goods))):
+            print("\n请输入正确商品编号")
+            continue
+
+        # 获取用户选择的商品信息
+        good_info = goods[goods_id]
+        name = good_info["name"]
+
+        # 将商品信息添加到购物车
+        # 判断购物车是否存在相同的产品
+        if name not in shopping_cart:
+            good_info["数量"] = 1
+            shopping_cart[name] = good_info
+        else:
+            shopping_cart[name]["数量"] += 1
+        print("\n当前购物车数据".center(20, "-"))
+        print(f"{'序号':<10}{'商品编号':<10}{'商品名称':<10}{'商品价格':<10}{'商品数量':<10}{'商品总价':<10}")
+        for index, good in enumerate(shopping_cart.values()):
+            print(f"{index+1:<10}{good['number']:<10}{good['name']:<10}{good['price']:<10}{good['数量']:<10}{good['数量']*good['price']:<10}")
+            print(f"{good['数量']*good['price']:<10}")
+        # 用户继续购买商品
+        # 用户选择结算
+        # 用户不想结算，退出购物，将用户购物车数据写入到用户数据
 
 
 # 5、提现功能

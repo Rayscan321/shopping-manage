@@ -21,6 +21,11 @@ if not os.path.exists(USER_DATA_DIR):
         BASE_DIR, "db", "user_data"
     )
 
+# 获取goods_data路径
+GOODS_DATA_DIR = os.path.join(
+        BASE_DIR, "db", "goods_data"
+    )
+
 # 获取银行利率
 RATE = config.getfloat("bank", "RATE")
 

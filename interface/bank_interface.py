@@ -19,7 +19,7 @@ def recharge(logged_user, money):
     if not user_data:
         return True, "\n用户不存在!"
     # 计算手续费
-    money = money * settings.RATE
+    money = money - money * settings.RATE
     # 修改余额
     user_data["balance"] += money
     # 记录流水
@@ -113,3 +113,23 @@ def check_flow(logged_user):
     # 获取用户数据
     user_data = db_handler.select_data(logged_user)
     return True, user_data["flow"]
+
+
+# 支付接口
+def pay(username, total_price):
+    # 获取用户数据
+    user_data = db_handler.select_data(username)
+
+    # 判断余额是否充足
+    if user_data["balance"] < total_price:
+        return False, f"\n用户{username}余额不足!支付{total_price}元失败!"
+
+    # 修改余额
+    user_data["balance"] -= total_price
+    # 记录流水
+    msg = f"\n{datetime.now()}:{username}支付{total_price}元成功!\n账户余额为{user_data['balance']}元"
+    user_data["flow"].append(msg)
+
+    # 调用数据处理层，保存用户数据
+    db_handler.save_data(user_data)
+    return True, msg

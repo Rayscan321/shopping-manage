@@ -22,7 +22,7 @@ def register(username, password, balance=0, is_admin=False):
         "username": username,
         "password": password,
         "balance": balance,
-        "shopping_cart": [],
+        "shopping_cart": {},
         "flow": [],
         "is_admin": is_admin,
         "locked": False,
