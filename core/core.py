@@ -16,7 +16,7 @@ def quit_soft():
 
 
 # 1、注册功能
-def register():
+def register(is_admin=False):
     print("注册功能")
     while True:
         # 用户输入账号密码
@@ -48,7 +48,7 @@ def register():
         # 密码加密
         password = common.pwd_to_sha256(password)
         # 调用用户接口注册
-        status, msg = user_interface.register(username, password)
+        status, msg = user_interface.register(username, password, is_admin=is_admin)
         print(msg)
         if status:
             break
@@ -80,7 +80,7 @@ def login():
 
 @common.login_auth
 # 3、充值功能
-def recharge():
+def recharge(username=False):
     while True:
         # 用户输入充值金额
         print("\n充值".center(20, "-"))
@@ -100,7 +100,9 @@ def recharge():
             print("\n充值金额必须大于0")
             continue
         # 调用用户接口充值
-        status, msg = bank_interface.recharge(logged_user, money)
+        if not username:
+            username = logged_user
+        status, msg = bank_interface.recharge(username, money)
         print(msg)
         if status:
             break
@@ -152,7 +154,7 @@ def check_balance():
 def check_flow():
     status, flow_list = bank_interface.check_flow(logged_user)
     if not flow_list:
-        print("没有流水记录")
+        print("\n没有流水记录")
     for flow in flow_list:
         print(flow)
 
@@ -208,7 +210,8 @@ def transfer():
 # 11、管理员功能
 @common.login_auth
 def admin():
-    print("管理员功能")
+    from core import admin
+    admin.main()
 
 
 func_dic = {
@@ -232,14 +235,18 @@ def main():
     while True:
         print("购物管理系统".center(20, "="))
         for num in func_dic:
-            print(f"{num} {func_dic[num][0]}".center(20, "="))
+            if logged_admin:
+                print(f"{num} {func_dic[num][0]}".center(20, "="))
+            else:
+                if num != "11":
+                    print(f"{num} {func_dic[num][0]}".center(20, "="))
         print("这是底部".center(20, "="))
         choice = input("请选择您需要功能的编号：").strip().lower()
-        if choice in func_dic:
-            func = func_dic.get(choice)[1]
-            func()
-        else:
+        if choice not in func_dic or (not logged_admin and choice == "11"):
             print("您输入的编号不存在，请重新选择")
+            continue
+        func = func_dic.get(choice)[1]
+        func()
 
 
 if __name__ == '__main__':

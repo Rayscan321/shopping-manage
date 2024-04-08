@@ -16,6 +16,10 @@ def recharge(logged_user, money):
     """
     # 获取用户数据
     user_data = db_handler.select_data(logged_user)
+    if not user_data:
+        return True, "\n用户不存在!"
+    # 计算手续费
+    money = money * settings.RATE
     # 修改余额
     user_data["balance"] += money
     # 记录流水
