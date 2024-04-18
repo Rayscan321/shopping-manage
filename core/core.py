@@ -176,7 +176,6 @@ def shopping():
         print(f"{'序号':<10}{'商品编号':<10}{'商品名称':<10}{'商品价格':<10}{'商品数量':<10}{'商品总价':<10}")
         for index, good in enumerate(shopping_cart.values()):
             print(f"{index+1:<10}{good['number']:<10}{good['name']:<10}{good['price']:<10}{good['数量']:<10}{good['数量']*good['price']:<10}")
-            print(f"{good['数量']*good['price']:<10}")
         # 用户继续购买商品
         # 用户选择结算
         # 用户不想结算，退出购物，将用户购物车数据写入到用户数据
@@ -230,8 +229,30 @@ def check_flow():
 # 8、查看购物车
 @common.login_auth
 def check_shopping_cart():
-    print("查看购物车")
+    # 调用查看购物车接口
+    shop_cart_file = shop_interface.check_shopping_cart(logged_user)
+    if not shop_cart_file:
+        print("\n购物车空空如也")
+        return
 
+    # 打印购物车数据
+    print("\n当前购物车数据".center(20, "-"))
+    print(f"{'序号':<10}{'商品编号':<10}{'商品名称':<10}{'商品价格':<10}{'商品数量':<10}{'商品总价':<10}")
+    for index, good in enumerate(shop_cart_file.values()):
+        print(
+            f"{index + 1:<10}{good['number']:<10}{good['name']:<10}{good['price']:<10}{good['数量']:<10}{good['数量'] * good['price']:<10}")
+
+        # 让用户选择购买或者退出
+        opt = input("y付款/n退出：").strip().lower()
+        # 如果用户输入y，就调用结算接口结算
+        if opt == "y":
+            stauts, msg, total_price = shop_interface.close_account(logged_user, shop_cart_file)
+            print(msg)
+            if stauts:
+                # 调用清空购物车接口
+                shop_interface.clear_shop_cart(logged_user)
+                # 如果结算失败自动退出查看购物车功能
+        break
 
 # 9、退出账号
 def logout():

@@ -2,7 +2,9 @@
 公共方法
 """
 import hashlib
+import logging.config
 from core import core
+from conf import settings
 
 
 # 登录认证装饰器
@@ -23,6 +25,15 @@ def pwd_to_sha256(pwd):
     sha256.update(b"123456")
     return sha256.hexdigest()
 
+
+# 日志记录功能
+def get_logger(logger_name):
+    # 加载日志配置字典
+    logging.config.dictConfig(settings.LOGGING_DIC)
+
+    # 获取logger
+    logger = logging.getLogger(logger_name)
+    return logger
 
 if __name__ == "__main__":
     print(pwd_to_sha256("123456"))

@@ -2,7 +2,9 @@
 用户接口
 """
 from db import db_handler
+from lib import common
 
+logger = common.get_logger("user")
 
 # 注册接口
 def register(username, password, balance=0, is_admin=False):
@@ -29,7 +31,9 @@ def register(username, password, balance=0, is_admin=False):
     }
     # 调用数据处理层，保存用户数据
     db_handler.save_data(user_data)
-    return True, "\n注册成功!"
+    msg = "注册成功!"
+    logger.info(msg)
+    return True, msg
 
 
 # 登录接口
@@ -50,5 +54,7 @@ def login(username, password):
     # 判断用户是否被锁定
     if user_data["locked"]:
         return False, f"\n该账号{username}已被锁定!", False
+    msg  =f"{username}登录成功!"
+    logger.info(msg)
 
-    return True, f"\n{username}登录成功!", user_data.get("is_admin")
+    return True, msg, user_data.get("is_admin")

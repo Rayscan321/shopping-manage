@@ -3,6 +3,9 @@
 """
 from db import db_handler
 from interface import bank_interface
+from lib import common
+
+logger = common.get_logger("shopping")
 
 
 # 查询商品接口
@@ -27,8 +30,9 @@ def add_shopping_cart(username, shopping_cart):
 
     # 保存用户数据
     db_handler.save_data(user_data)
-
-    return True, "添加购物车成功!"
+    msg = f"用户{username}添加购物车成功!"
+    logger.info(msg)
+    return True, msg
 
 
 # 结算接口
@@ -42,3 +46,18 @@ def close_account(username, shopping_cart):
 
     stauts, msg = bank_interface.pay(username, total_price)
     return stauts, msg, total_price
+
+
+# 查看购物车接口
+def check_shopping_cart(username):
+    user_data = db_handler.select_data(username)
+    shopping_cart_file = user_data["shopping_cart"]
+    msg = f"用户{username}查看了购物车"
+    logger.info(msg)
+    return shopping_cart_file
+
+# 清空购物车接口
+def clear_shop_cart(username):
+    user_data = db_handler.select_data(username)
+    user_data["shopping_cart"] = {}
+    db_handler.save_data(user_data)
